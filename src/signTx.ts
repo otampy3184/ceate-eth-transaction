@@ -4,6 +4,7 @@ import { TransactionRequest } from "@ethersproject/abstract-provider";
 import 'dotenv/config';
 import fs from "fs";
 import { argv } from "process";
+import { sign } from "crypto";
 
 const alchemy_api = process.env.JSON_RPC;
 const mnemonic = fs.readFileSync(".secret").toString().trim();
@@ -12,7 +13,7 @@ const mnemonic = fs.readFileSync(".secret").toString().trim();
 const recipient: string = argv[2];
 const value: string = argv[3];
 
-const app = async(recipient: string, value: string) => {
+const app = async(recipient: string, value: string):Promise<string> => {
     // AlchemyAPIからEthereumとの接続用インスタンスを作成
     const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
 
@@ -50,16 +51,17 @@ const app = async(recipient: string, value: string) => {
 
     // Signerインスタンスを使ってTxにサインを行う
     const signedTx = await wallet.signTransaction(tx);
-    console.log("signedTx:", signedTx);
 
     // 署名済みのトランザクションをBroadcastする
-    const sentTx = await provider.sendTransaction(signedTx);
-    console.log(sentTx.hash);
+    // const sentTx = await provider.sendTransaction(signedTx);
+    // console.log(sentTx.hash);
+    return signedTx;
 }
 
-const runApp = async () => {
+export const runApp = async (recipient: string, value: string) => {
     try {
-        await app(recipient, value);
+        const signedTx = await app(recipient, value);
+        console.log("signedTx:", signedTx);
         process.exit(0);
     } catch (error){
         console.log(error);
@@ -67,5 +69,4 @@ const runApp = async () => {
     }
 }
 
-runApp();
-
+runApp(recipient, value);
