@@ -1,72 +1,89 @@
-import { ethers } from "ethers";
-import { TransactionRequest } from "@ethersproject/abstract-provider";
+import { BigNumber, BigNumberish, ethers } from "ethers";
+import { TransactionRequest, TransactionResponse } from "@ethersproject/abstract-provider";
 
 import 'dotenv/config';
 import fs from "fs";
 import { argv } from "process";
-import { sign } from "crypto";
 
 const alchemy_api = process.env.JSON_RPC;
 const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 // コマンドライン引数から送信先アドレスと送金額を取得しておく
 const recipient: string = argv[2];
-const value: string = argv[3];
+const amount: string = argv[3];
 
-const app = async(recipient: string, value: string):Promise<string> => {
-    // AlchemyAPIからEthereumとの接続用インスタンスを作成
-    const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
+// AlchemyAPIからEthereumとの接続用インスタンスを作成
+const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
 
-    // Memonicから署名用のインスタンスを作成
-    const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+// Memonicから署名用のインスタンスを作成
+const signer = ethers.Wallet.fromMnemonic(mnemonic);
+
+export const app = async (recipient: string, amount: string) => {
+    /**
+     * 署名Transaction生成するためのパラメータを用意
+     * sender => 送信先アドレス
+     * value => 送金額
+     * gasPrice => 現在のGasPrice
+     * gasLimit => 既定のGasLimit
+     * nonce => 一意の数
+     */
+    const sender = signer.address;
+    const value: BigNumber = ethers.utils.parseUnits(amount, "ether");
+    const gasPrice: BigNumber = await provider.getGasPrice(); // Providerから現在のGasPriceを取得(オンライン専用)
+    const gasLimit = ethers.utils.hexlify(100000); // エンコードした値に変換
+    const nonce = await provider.getTransactionCount(signer.address, "latest"); // 一意のNonceを生成するためにTransactionCountを利用する(オンライン専用) 
+
+    // オフライン実行時は以下
+    // const gasPrice: BigNumberish = ethers.utils.parseEther("21", "gwei");
+    // const nonce: BigNumberish = new DataTransfer().getTime();
 
     /**
-     * Tx作成用の諸々の値を作っていく
+     * Tx作成 ==> Tx署名 ==> Tx送信
      */
+    const unsignedTx = createTx(sender, recipient, value, gasPrice, gasLimit, nonce);
+    const signedTx = await signTx(unsignedTx);
+    //const sentTx = await sendTx(signedTx);
 
-    // Providerから現在のGasPriceを取得(オンライン専用)
-    const gasPrice = await provider.getGasPrice();
+    //console.log(sentTx.hash);
+}
 
-    // 一意のNonceを生成するためにTransactionCountを利用する(オンライン専用) 
-    const nonce = await provider.getTransactionCount(wallet.address, "latest");
-    
-    // オフライン実行時は以下
-    // const gasPrice = ethers.utils.parseEther("21", "gwei");
-    // const nonce = new DataTransfer().getTime();
-
-    // 署名用Transactionを生成
-    const tx : TransactionRequest = {
-        from: wallet.address,
-        to: recipient,
-        value: ethers.utils.parseUnits(value, "ether"), // 送金額
+// 未署名のTxを作成する
+export const createTx = (from: string, to: string, value: ethers.BigNumber, gasPrice: ethers.BigNumber, gasLimit: string, nonce: number): TransactionRequest => {
+    const unsignedTx: TransactionRequest = {
+        from: from,
+        to: to,
+        value: value,
         gasPrice: gasPrice,
-        gasLimit: ethers.utils.hexlify(100000), // 適当なGasリミット
+        gasLimit: gasLimit,
         nonce: nonce
     }
+    console.log("unsignedTx: ", unsignedTx);
+    return unsignedTx;
+}
 
-    /**
-     * 作成したTransactionに署名を行う
-     * 署名トランザクションをEthereumネットワークに送る
-     */
-
-    // Signerインスタンスを使ってTxにサインを行う
-    const signedTx = await wallet.signTransaction(tx);
-
-    // 署名済みのトランザクションをBroadcastする
-    // const sentTx = await provider.sendTransaction(signedTx);
-    // console.log(sentTx.hash);
+// Signerインスタンスを使ってTxにサインを行う
+export const signTx = async (unsignedTx: TransactionRequest): Promise<string> => {
+    const signer = ethers.Wallet.fromMnemonic(mnemonic);
+    const signedTx = await signer.signTransaction(unsignedTx);
+    console.log("signedTx: ", signedTx)
     return signedTx;
 }
 
-export const runApp = async (recipient: string, value: string) => {
-    try {
-        const signedTx = await app(recipient, value);
-        console.log("signedTx:", signedTx);
-        process.exit(0);
-    } catch (error){
-        console.log(error);
-        process.exit(1);
-    }
+// Providerインスタンスを使って署名済みTxをBroadcastする
+export const sendTx = async (signedTx: string): Promise<TransactionResponse> => {
+    const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
+    const sentTx = await provider.sendTransaction(signedTx);
+    return sentTx;
 }
 
-runApp(recipient, value);
+// export const runApp = async (recipient: string, value: string) => {
+//     try {
+//         await app(recipient, value);
+//         process.exit(0);
+//     } catch (error) {
+//         console.log(error);
+//         process.exit(1);
+//     }
+// }
+
+// runApp(recipient, amount);
