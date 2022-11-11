@@ -4,14 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --require ts-node/register --watch-extensions ts \"tests/*.ts\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.0",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.1.0"
   }
 }
