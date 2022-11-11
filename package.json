@@ -4,20 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require ts-node/register --watch-extensions ts \"tests/*.ts\""
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.3.4",
-    "@types/mocha": "^10.0.0",
+    "@types/jest": "^29.2.2",
+    "@types/node": "^18.11.9",
+    "chai": "^4.3.7",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
-    "ts-node": "^10.9.1"
-  },
-  "dependencies": {
-    "chai": "^4.3.7",
-    "mocha": "^10.1.0"
+    "jest": "^29.3.1",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
   }
 }
