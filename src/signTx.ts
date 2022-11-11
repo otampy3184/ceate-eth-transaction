@@ -1,12 +1,18 @@
 import { ethers } from "ethers";
 import { TransactionRequest } from "@ethersproject/abstract-provider";
+
 import 'dotenv/config';
 import fs from "fs";
+import { argv } from "process";
 
 const alchemy_api = process.env.JSON_RPC;
 const mnemonic = fs.readFileSync(".secret").toString().trim();
 
-const app = async() => {
+// コマンドライン引数から送信先アドレスと送金額を取得しておく
+const recipient: string = argv[2];
+const value: string = argv[3];
+
+const app = async(recipient: string, value: string) => {
     // AlchemyAPIからEthereumとの接続用インスタンスを作成
     const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
 
@@ -16,9 +22,6 @@ const app = async() => {
     /**
      * Tx作成用の諸々の値を作っていく
      */
-
-    // サンプルの受け取り用アドレス
-    const recipient = "0x347cDceee806d8b45063B741F6B4fe538458aB74";
 
     // Providerから現在のGasPriceを取得(オンライン専用)
     const gasPrice = await provider.getGasPrice();
@@ -34,11 +37,16 @@ const app = async() => {
     const tx : TransactionRequest = {
         from: wallet.address,
         to: recipient,
-        value: ethers.utils.parseUnits("0.001", "ether"), // 送金額
+        value: ethers.utils.parseUnits(value, "ether"), // 送金額
         gasPrice: gasPrice,
         gasLimit: ethers.utils.hexlify(100000), // 適当なGasリミット
         nonce: nonce
     }
+
+    /**
+     * 作成したTransactionに署名を行う
+     * 署名トランザクションをEthereumネットワークに送る
+     */
 
     // Signerインスタンスを使ってTxにサインを行う
     const signedTx = await wallet.signTransaction(tx);
@@ -51,7 +59,7 @@ const app = async() => {
 
 const runApp = async () => {
     try {
-        await app();
+        await app(recipient, value);
         process.exit(0);
     } catch (error){
         console.log(error);
