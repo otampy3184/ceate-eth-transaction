@@ -1,19 +1,22 @@
 import { ethers, BigNumber, BigNumberish } from "ethers";
-
 import { createTx, signTx } from "./ethereumTx";
 import { argv } from "process";
-
-import 'dotenv/config';
 import fs from "fs";
+import 'dotenv/config';
 
+// memonicから署名用のインスタンスを生成
 const mnemonic = fs.readFileSync(".secret1").toString().trim();
-
 const signer = ethers.Wallet.fromMnemonic(mnemonic);
 
-// コマンドライン引数から送信先アドレスと送金額を取得
+// コマンドラインから送信先アドレスと送金額を取得
 const recipient: string = argv[2];
 const amount: string = argv[3];
 
+/**
+ * 引数からTransactionを生成し署名を行う
+ * @param recipient 
+ * @param amount 
+ */
 const runOffline = async(recipient: string, amount: string) => {
     try {
          /**
@@ -30,9 +33,13 @@ const runOffline = async(recipient: string, amount: string) => {
         const gasLimit = ethers.utils.hexlify(100000); // エンコードした値に変換
         const nonce: BigNumberish = new Date().getTime();
 
+        /**
+         * Tx作成 ==> Tx署名
+         */
         const unsignedTx = createTx(sender, recipient, value, gasPrice, gasLimit, nonce);
         const signedTx = await signTx(unsignedTx);
         console.log("signedTx: ", signedTx)
+
         process.exit(0);
     } catch (error){
         console.log(error);

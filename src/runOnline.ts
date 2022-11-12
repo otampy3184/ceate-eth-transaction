@@ -1,21 +1,26 @@
 import { ethers, BigNumber } from "ethers";
-
 import { createTx, signTx, sendTx } from "./ethereumTx";
 import { argv } from "process";
-
 import 'dotenv/config';
 import fs from "fs";
 
+// memonicから署名用のインスタンスを生成
 const mnemonic = fs.readFileSync(".secret1").toString().trim();
-const alchemy_api = process.env.JSON_RPC;
-
-const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
 const signer = ethers.Wallet.fromMnemonic(mnemonic);
 
-// コマンドライン引数から送信先アドレスと送金額を取得
+// alchemyのapi_keyからGoerli接続用のインスタンスを生成
+const alchemy_api = process.env.JSON_RPC;
+const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
+
+// コマンドラインから送信先アドレスと送金額を取得
 const recipient: string = argv[2];
 const amount: string = argv[3];
 
+/**
+ * 引数からTransactionを生成し、署名を行なってからGoerliテストネットワーク上にTransactionを送る
+ * @param recipient
+ * @param value 
+ */
 export const runOnline = async (recipient: string, value: string) => {
     try {
         /**
@@ -38,8 +43,8 @@ export const runOnline = async (recipient: string, value: string) => {
         const unsignedTx = createTx(sender, recipient, value, gasPrice, gasLimit, nonce);
         const signedTx = await signTx(unsignedTx);
         const sentTx = await sendTx(signedTx);
-    
         console.log(sentTx.hash);
+
         process.exit(0);
     } catch (error) {
         console.log(error);
