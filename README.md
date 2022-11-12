@@ -31,7 +31,7 @@ example of runOffline.ts(signed transaction appeared below the command)
 signedTx: 0xf8660510830186a094347cdceee806d8b45063b741f6b4fe538458ab74865af3107a4000801ca09eb01332dcf3c37ff38c081e51f107978ba5b03e7fba11ef0dd503f2ac5bb23da02e81a06a3191ba72d45bc3e6f1b20eda8e5c5e1f0bee4a6060539e52805d78c1
 ```
 
-example of runOnline.ts(hash of send transaction appered below the command)
+example of runOnline.ts(hash of transaction appered below the command)
 
 ```:
 takagihrs@hiroshinoMacBook-Pro create-eth-transaction % ./node_modules/.bin/ts-node src/runOnline.ts 0x347cDceee806d8b45063B741F6B4fe538458aB74 0.001
