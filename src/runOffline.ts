@@ -14,7 +14,7 @@ const signer = ethers.Wallet.fromMnemonic(mnemonic);
 const recipient: string = argv[2];
 const amount: string = argv[3];
 
-const runOffline = async(recipient, amount) => {
+const runOffline = async(recipient: string, amount: string) => {
     try {
          /**
          * 署名Transaction生成するためのパラメータを用意
@@ -33,8 +33,10 @@ const runOffline = async(recipient, amount) => {
         const unsignedTx = createTx(sender, recipient, value, gasPrice, gasLimit, nonce);
         const signedTx = await signTx(unsignedTx);
         console.log("signedTx: ", signedTx)
+        process.exit(0);
     } catch (error){
         console.log(error);
+        process.exit(1)
     }
 }
 

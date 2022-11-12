@@ -40,6 +40,7 @@ export const runOnline = async (recipient: string, value: string) => {
         const sentTx = await sendTx(signedTx);
     
         console.log(sentTx.hash);
+        process.exit(0);
     } catch (error) {
         console.log(error);
         process.exit(1);
