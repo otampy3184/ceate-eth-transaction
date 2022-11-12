@@ -1,20 +1,22 @@
-import { expect, assert } from "chai";
-import { ethers, BigNumber } from "ethers";
+import { expect } from "chai";
+import { ethers } from "ethers";
 import { TransactionRequest, TransactionResponse } from "@ethersproject/abstract-provider";
 
-import {  app, createTx, signTx, sendTx } from "../src/signTx";
+import {  app, createTx, signTx, sendTx } from "../src/ethereumTx";
 
 import 'dotenv/config';
 import fs from "fs";
 
-test('test', async function() {
-    const alchemy_api = process.env.JSON_RPC;
-    const mnemonic = fs.readFileSync(".secret").toString().trim();
+const alchemy_api = process.env.JSON_RPC;
+const mnemonic1 = fs.readFileSync(".secret1").toString().trim();
+const memonic2 = fs.readFileSync(".secret2").toString().trim();
+const signer = ethers.Wallet.fromMnemonic(mnemonic1);
+const receiver = ethers.Wallet.fromMnemonic(memonic2);
+const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
 
-    const signer = ethers.Wallet.fromMnemonic(mnemonic);
-
+test('正常系:createTx', async() =>  {
     const sender: string = signer.address;
-    const recipient2: string = "0x347cDceee806d8b45063B741F6B4fe538458aB7"
+    const recipient: string = receiver.address;
     const value: ethers.BigNumber = ethers.utils.parseUnits('0.001', 18);
     const gasPrice: ethers.BigNumber = ethers.utils.parseUnits('21.0', 9); // Providerから現在のGasPriceを取得(オンライン専用)
     const gasLimit: string = ethers.utils.hexlify(100000); // エンコードした値に変換
@@ -22,17 +24,50 @@ test('test', async function() {
 
     const tx: TransactionRequest = {
         from: sender,
-        to: recipient2,
+        to: recipient,
         value: value,
         gasPrice: gasPrice,
         gasLimit: gasLimit,
         nonce: nonce
     }
-    console.log(tx);
 
-    const actual: TransactionRequest = createTx(sender, recipient2, value, gasPrice, gasLimit, nonce)
-
-    console.log(actual)
+    const actual: TransactionRequest = createTx(sender, recipient, value, gasPrice, gasLimit, nonce)
 
     expect(JSON.stringify(actual)).to.equal(JSON.stringify(tx))
+})
+
+test('正常系:signTx', async() => {
+    const sender: string = signer.address;
+    const recipient: string = receiver.address;
+    const value: ethers.BigNumber = ethers.utils.parseUnits('0.001', 18);
+    const gasPrice: ethers.BigNumber = ethers.utils.parseUnits('21.0', 9); // Providerから現在のGasPriceを取得(オンライン専用)
+    const gasLimit: ethers.BigNumberish = ethers.utils.hexlify(100000); // エンコードした値に変換
+    const nonce: number = new Date().getTime();
+
+    const tx: TransactionRequest = createTx(sender, recipient, value, gasPrice, gasLimit, nonce)
+
+    const signedTx = await signer.signTransaction(tx);
+
+    const actual = await signTx(tx);
+
+    expect(actual).to.equal(signedTx);
+})
+
+test('正常系:sendTx', async() => {
+    const sender: string = signer.address;
+    const recipient: string = receiver.address;
+    const value: ethers.BigNumber = ethers.utils.parseUnits('0.001', 18);
+    const gasPrice: ethers.BigNumber = ethers.utils.parseUnits('21.0', 9); // Providerから現在のGasPriceを取得(オンライン専用)
+    const gasLimit: ethers.BigNumberish = ethers.utils.hexlify(100000); // エンコードした値に変換
+    const nonce: number = new Date().getTime();
+
+    const tx: TransactionRequest = createTx(sender, recipient, value, gasPrice, gasLimit, nonce)
+
+    const signedTx = await signTx(tx);
+
+    const actual = await sendTx(signedTx);
+
+    const sentTx = await provider.sendTransaction(signedTx);
+
+    expect(actual.hash).to.equal(sentTx.hash);
 })
