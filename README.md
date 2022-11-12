@@ -38,7 +38,7 @@ takagihrs@hiroshinoMacBook-Pro create-eth-transaction % ./node_modules/.bin/ts-n
 0x44a8c17bec5fc329f77c76274cb86226ec19ecccd404a63536f3516ae85efab1
 ```
 
-[check it out on ethscan](https://goerli.etherscan.io/tx/0x44a8c17bec5fc329f77c76274cb86226ec19ecccd404a63536f3516ae85efab1)
+[check it out on etherscan](https://goerli.etherscan.io/tx/0x44a8c17bec5fc329f77c76274cb86226ec19ecccd404a63536f3516ae85efab1)
 
 ## Test results
 
