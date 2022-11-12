@@ -3,14 +3,10 @@ import { TransactionRequest, TransactionResponse } from "@ethersproject/abstract
 
 import 'dotenv/config';
 import fs from "fs";
-import { argv } from "process";
 
 const alchemy_api = process.env.JSON_RPC;
 const mnemonic = fs.readFileSync(".secret1").toString().trim();
 
-// コマンドライン引数から送信先アドレスと送金額を取得しておく
-const recipient: string = argv[2];
-const amount: string = argv[3];
 
 // AlchemyAPIからEthereumとの接続用インスタンスを作成
 const provider = new ethers.providers.JsonRpcProvider(alchemy_api);
@@ -76,14 +72,3 @@ export const sendTx = async (signedTx: string): Promise<TransactionResponse> => 
     return sentTx;
 }
 
-// export const runApp = async (recipient: string, value: string) => {
-//     try {
-//         await app(recipient, value);
-//         process.exit(0);
-//     } catch (error) {
-//         console.log(error);
-//         process.exit(1);
-//     }
-// }
-
-// runApp(recipient, amount);
