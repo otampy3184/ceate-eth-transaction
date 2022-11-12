@@ -6,7 +6,7 @@ import fs from "fs";
 import { argv } from "process";
 
 const alchemy_api = process.env.JSON_RPC;
-const mnemonic = fs.readFileSync(".secret").toString().trim();
+const mnemonic = fs.readFileSync(".secret1").toString().trim();
 
 // コマンドライン引数から送信先アドレスと送金額を取得しておく
 const recipient: string = argv[2];
