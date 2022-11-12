@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "ethers";
 import { TransactionRequest, TransactionResponse } from "@ethersproject/abstract-provider";
 
-import {  app, createTx, signTx, sendTx } from "../src/ethereumTx";
+import {  createTx, signTx, sendTx } from "../src/ethereumTx";
 
 import 'dotenv/config';
 import fs from "fs";
