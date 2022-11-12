@@ -53,21 +53,22 @@ test('正常系:signTx', async() => {
     expect(actual).to.equal(signedTx);
 })
 
-test('正常系:sendTx', async() => {
-    const sender: string = signer.address;
-    const recipient: string = receiver.address;
-    const value: ethers.BigNumber = ethers.utils.parseUnits('0.001', 18);
-    const gasPrice: ethers.BigNumber = ethers.utils.parseUnits('21.0', 9); // Providerから現在のGasPriceを取得(オンライン専用)
-    const gasLimit: ethers.BigNumberish = ethers.utils.hexlify(100000); // エンコードした値に変換
-    const nonce: number = new Date().getTime();
+// Nonceが被るからTest不可
+// test('正常系:sendTx', async() => {
+//     const sender: string = signer.address;
+//     const recipient: string = receiver.address;
+//     const value: ethers.BigNumber = ethers.utils.parseUnits('0.001', 18);
+//     const gasPrice: ethers.BigNumber = ethers.utils.parseUnits('21.0', 9); // Providerから現在のGasPriceを取得(オンライン専用)
+//     const gasLimit: ethers.BigNumberish = ethers.utils.hexlify(100000); // エンコードした値に変換
+//     const nonce: number = new Date().getTime();
 
-    const tx: TransactionRequest = createTx(sender, recipient, value, gasPrice, gasLimit, nonce)
+//     const tx: TransactionRequest = createTx(sender, recipient, value, gasPrice, gasLimit, nonce)
 
-    const signedTx = await signTx(tx);
+//     const signedTx = await signTx(tx);
 
-    const actual = await sendTx(signedTx);
+//     const actual = await sendTx(signedTx);
 
-    const sentTx = await provider.sendTransaction(signedTx);
+//     const sentTx = await provider.sendTransaction(signedTx);
 
-    expect(actual.hash).to.equal(sentTx.hash);
-})
+//     expect(actual.hash).to.equal(sentTx.hash);
+// })
